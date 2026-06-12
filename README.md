@@ -1,89 +1,89 @@
-# Debian Admin-Runbook: die Jahresinspektion
+# Debian Admin Runbook: The Annual Inspection
 
-Ein Runbook zum Selberlernen. Es beschreibt, wie man ein Debian-System einmal im Jahr oder nach jedem größeren Umbau gründlich inspiziert und wartet. Das Vorbild ist die Inspektion in der Autowerkstatt: erst die vollständige Bestandsaufnahme, dann der Kostenvoranschlag, dann die Reparatur.
+A hands-on runbook for inspecting and maintaining Debian systems. The model is a car service: full assessment first, then a cost estimate, then the repair. Built for admins who inherit or neglect systems and want a repeatable procedure instead of ad-hoc fixes.
 
-## Die Philosophie
+## Principles
 
-**1. Erst der Kostenvoranschlag, dann die Werkstatt.**
-Die Inspektion ist strikt read-only. Man sammelt Befunde, sortiert sie nach Schweregrad und schätzt den Aufwand. Erst danach wird entschieden, was gemacht wird. Niemals sehen und sofort fixen. Was wie eine Leiche aussieht, kann in Benutzung sein. Ein Blick auf die Änderungszeit einer Datei verrät oft mehr als ihr Name.
+**1. Estimate first, repair second.**
+The inspection is strictly read-only. Collect findings, rank them by severity, estimate effort. Decide what to fix only after the full picture exists. Never see-and-fix: what looks like dead weight may be in active use. A file's mtime tells you more than its name.
 
-**2. Reversibel vor endgültig.**
-Configs und Daten werden zuerst in ein Archivverzeichnis verschoben, zum Beispiel `~/altlasten-<datum>/`. Nach einer Woche ohne Vermissen darf gelöscht werden. Nur Caches dürfen sofort weg, denn sie regenerieren sich. Vor jedem `git reset` oder `git pull` auf ein driftendes Repo gehört ein Backup-Branch angelegt.
+**2. Reversible beats permanent.**
+Move configs and data to an archive directory (e.g. `~/attic-<date>/`) instead of deleting. Delete after a week of not missing anything. Only caches may be deleted immediately; they regenerate. Before any `git reset` or `git pull` on a drifted repo, create a backup branch.
 
-**3. Verstehen vor abschalten.**
-Vor jedem `apt purge` eines Dienstes steht der Blick in seine Konfiguration. Ein Webserver kann ein vergessenes Experiment sein oder der Reverse-Proxy vor einem Dienst, der gebraucht wird. Das weiß man erst, nachdem man nachgesehen hat.
+**3. Understand before you disable.**
+Before purging any service, read its config. A web server may be a forgotten experiment or the reverse proxy in front of something you need. You only know after you look.
 
-**4. Simulieren vor ausführen.**
-`apt-get -s remove <paket> --autoremove` zeigt den kompletten Rattenschwanz an Abhängigkeiten, bevor er real entfernt wird. An wenigen vergessenen Kleinpaketen können hunderte Pakete hängen.
+**4. Simulate before you execute.**
+`apt-get -s remove <pkg> --autoremove` shows the full dependency chain before anything happens. A handful of forgotten packages can anchor hundreds.
 
-**5. Härtetest oder es zählt nicht.**
-"Müsste eigentlich gehen" ist kein Befund. Ein VPN-Killswitch gilt erst als vorhanden, wenn der Tunnel getrennt wurde und die Verbindung nachweislich blockiert war. Ein Backup gilt erst als Backup, wenn der Restore-Test gelaufen ist.
+**5. No test, no claim.**
+"Should be fine" is not a finding. A VPN kill switch exists once you have disconnected the tunnel and verified traffic is blocked. A backup exists once a restore test has passed.
 
-## Ablauf einer Inspektion
+## Inspection workflow
 
-1. **Inspektion (read-only):** `scripts/inspektion.sh` laufen lassen. Danach pro Kapitel die Prüfbefehle durchgehen und Befunde notieren.
-2. **Kostenvoranschlag:** Befunde nach Schweregrad (kritisch, hoch, mittel, niedrig) und Aufwand sortieren. Daraus Arbeitspakete schnüren.
-3. **Werkstatt:** Die Pakete in sinnvoller Reihenfolge abarbeiten. Sicherheit zuerst. Backup nie ans Ende schieben. Kosmetik zuletzt.
-4. **Abnahme:** `systemctl --failed` muss leer sein. `apt list --upgradable` muss leer sein. Härtetests müssen bestanden sein. Offene Ports müssen vollständig erklärbar sein.
+1. **Inspect (read-only):** run `scripts/inspect.sh`, then walk the per-chapter checks. Record findings.
+2. **Estimate:** rank findings by severity (critical, high, medium, low) and effort. Bundle into work packages.
+3. **Repair:** work the packages in order. Security first. Never postpone backup. Cosmetics last.
+4. **Sign-off:** `systemctl --failed` empty. `apt list --upgradable` empty. Hardening tests passed. Every open port accounted for.
 
-## Kapitel
+## Chapters
 
-| # | Kapitel | Kernfrage |
+| # | Chapter | Core question |
 |---|---|---|
-| 1 | [Pakete und Updates](kapitel/01-pakete-und-updates.md) | Ist das System aktuell und patcht es sich selbst? |
-| 2 | [Dienste und Ports](kapitel/02-dienste-und-ports.md) | Was lauscht da und wird es noch gebraucht? |
-| 3 | [systemd, Boot und Logs](kapitel/03-systemd-boot-logs.md) | Läuft alles, was laufen soll, und nichts heimlich kaputt? |
-| 4 | [Speicher und Hygiene](kapitel/04-speicher-und-hygiene.md) | Wo liegen die Gigabyte-Leichen? |
-| 5 | [Sicherheit](kapitel/05-sicherheit.md) | Zeitsync, SSH, Datei-Rechte auf Geheimnissen, VPN-Leaks |
-| 6 | [Backup und Platten](kapitel/06-backup-und-platten.md) | Überleben die Daten einen Plattentod? |
-| 7 | [Desktop-Altlasten](kapitel/07-desktop-altlasten.md) | Aufräumen nach einem Desktop-Wechsel |
-| 8 | [Dotfiles und Drift](kapitel/08-dotfiles-und-drift.md) | Eine Wahrheit für Configs auf allen Maschinen |
+| 1 | [Packages and updates](chapters/01-packages-and-updates.md) | Is the system current, and does it patch itself? |
+| 2 | [Services and ports](chapters/02-services-and-ports.md) | What is listening, and is it still needed? |
+| 3 | [systemd, boot, logs](chapters/03-systemd-boot-logs.md) | Is anything failing silently? |
+| 4 | [Storage and hygiene](chapters/04-storage-and-hygiene.md) | Where are the gigabytes buried? |
+| 5 | [Security](chapters/05-security.md) | Time sync, SSH, secret permissions, VPN leaks |
+| 6 | [Backup and disks](chapters/06-backup-and-disks.md) | Do the data survive a dead disk? |
+| 7 | [Desktop remnants](chapters/07-desktop-remnants.md) | Cleaning up after a desktop environment switch |
+| 8 | [Dotfiles and drift](chapters/08-dotfiles-and-drift.md) | One source of truth for configs on every machine |
 
-Dazu kommt [`scripts/inspektion.sh`](scripts/inspektion.sh) als read-only Schnellcheck für den Einstieg.
+Plus [`scripts/inspect.sh`](scripts/inspect.sh): a read-only quick check to start with.
 
-## Schnell-Checkliste (die 15-Minuten-Inspektion)
+## The 15-minute checklist
 
 ```bash
-# System und Zeit
+# System and time
 cat /etc/os-release | head -2; uname -r; uptime
-timedatectl | grep -E "synchronized|NTP"          # muss "yes" und "active" zeigen
+timedatectl | grep -E "synchronized|NTP"          # must show "yes" and "active"
 
 # Updates
 sudo apt update -qq && apt list --upgradable 2>/dev/null | wc -l
-dpkg -l unattended-upgrades 2>/dev/null | grep -c ^ii   # 1 bedeutet: Automatik vorhanden
+dpkg -l unattended-upgrades 2>/dev/null | grep -c ^ii   # 1 = automation exists
 
-# Dienste und Ports
-systemctl --failed --no-legend                     # leer ist das Ziel
-ss -tulnp 2>/dev/null | grep -v 127.0.0.1          # jeden Eintrag erklaeren koennen
+# Services and ports
+systemctl --failed --no-legend                     # empty is the target
+ss -tulnp 2>/dev/null | grep -v 127.0.0.1          # account for every line
 
-# Docker-Zombies
+# Docker zombies
 docker ps -a 2>/dev/null | grep -i restarting
 
-# Platz und Leichen
+# Disk and corpses
 df -h / ; du -xsh ~/.cache /var/cache/apt 2>/dev/null
-ls -la ~ | grep -E "core\.|debug\.log|\.deb$"      # nichts davon gehoert in die Home-Wurzel
+ls -la ~ | grep -E "core\.|debug\.log|\.deb$"      # none of this belongs in $HOME
 
-# Backup-Realitaet
-systemctl --user list-timers | grep -i backup      # existiert ein Timer und lief er?
+# Backup reality
+systemctl --user list-timers | grep -i backup      # does a timer exist, did it run?
 sudo smartctl -H /dev/nvme0n1 /dev/sda 2>/dev/null | grep -i result
 ```
 
-Leuchtet irgendwo Rot auf, hilft das passende Kapitel weiter.
+Anything red: open the matching chapter.
 
-## Typische Befunde aus der Praxis
+## Recurring findings in the wild
 
-Diese Muster tauchen auf vernachlässigten Systemen immer wieder auf. Alle sind leise. Nichts davon wirft Fehlermeldungen. Genau das macht sie gefährlich.
+These patterns show up on neglected systems again and again. All of them are silent. None of them throw errors. That is what makes them dangerous.
 
-- **Keine Zeitsynchronisation installiert.** Die Uhr driftet unbemerkt. Irgendwann scheitern 2FA-Codes und TLS-Prüfungen. Der Fix ist eine Zeile, das Problem bleibt oft ein Jahr unentdeckt.
-- **Schlüsseldateien mit Rechten 777.** Jeder Prozess des Users darf den Zweitfaktor der Passwortdatenbank lesen.
-- **Container monatelang in einer Restart-Schleife.** Dauerlast und viele Gigabyte tote Images. Auffindbar nur über `docker ps -a`, das nie jemand aufruft.
-- **Snapshots auf derselben Platte als "Backup" verstanden.** Das ist ein Rollback-Mechanismus. Gegen Plattenausfall hilft er nicht. Wertvolle Daten existieren dann genau einmal.
-- **Torrent-Client lauscht trotz VPN auf allen Interfaces.** Ohne Interface-Bindung läuft der Traffic bei einem Tunnelabbruch über die echte IP weiter.
-- **Ein Dutzend Netzwerkdienste für ein Netz, das es nicht mehr gibt.** Firewall-Regeln und Exporte zeigen auf alte Subnetze und verraten so die Drift.
-- **Dotfiles als lose Kopien.** Lokale Configs und das Repo laufen still auseinander, bis nichts mehr zusammenpasst.
+- **No time sync installed.** The clock drifts unnoticed until 2FA codes and TLS validation start failing. One-line fix, often undetected for a year.
+- **Key files with mode 777.** Every process of the user can read the second factor of the password database.
+- **Containers stuck in a restart loop for months.** Constant CPU load plus gigabytes of dead images. Only visible via `docker ps -a`, which nobody runs.
+- **Snapshots on the same disk mistaken for backup.** That is a rollback mechanism. It does not survive disk failure. Valuable data then exists exactly once.
+- **Torrent client listening on all interfaces despite a VPN.** Without interface binding, traffic leaks over the real IP the moment the tunnel drops.
+- **A dozen network services for a LAN that no longer exists.** Firewall rules and exports pointing at old subnets reveal the drift.
+- **Dotfiles as loose copies.** Local configs and the repo silently diverge until nothing matches.
 
-## Rhythmus
+## Cadence
 
-- **Wöchentlich automatisch:** unattended-upgrades, smartd und Backup-Timer richtet man einmal ein und darf sie dann vergessen.
-- **Monatlich fünf Minuten:** die Schnell-Checkliste oben.
-- **Jährlich oder nach jedem Umbau:** die volle Inspektion, Kapitel für Kapitel.
+- **Weekly, automated:** unattended-upgrades, smartd, backup timers. Set up once, then allowed to be forgotten.
+- **Monthly, five minutes:** the checklist above.
+- **Yearly or after every major rebuild:** the full inspection, chapter by chapter.
