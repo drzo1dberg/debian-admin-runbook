@@ -38,8 +38,13 @@ Before purging any service, read its config. A web server may be a forgotten exp
 | 6 | [Backup and disks](chapters/06-backup-and-disks.md) | Do the data survive a dead disk? |
 | 7 | [Desktop remnants](chapters/07-desktop-remnants.md) | Cleaning up after a desktop environment switch |
 | 8 | [Dotfiles and drift](chapters/08-dotfiles-and-drift.md) | One source of truth for configs on every machine |
+| 9 | [Dual-boot: CachyOS alongside Debian](chapters/09-dualboot-cachyos.md) | A performance tuned second system without breaking the first |
 
-Plus [`scripts/inspect.sh`](scripts/inspect.sh): a read-only quick check to start with.
+Scripts:
+
+- [`scripts/inspect.sh`](scripts/inspect.sh): read-only quick check of a Debian system, the place to start.
+- [`scripts/dualboot-preflight.sh`](scripts/dualboot-preflight.sh): read-only readiness check before adding a second distribution (chapter 9).
+- [`scripts/cachyos-postinstall-check.sh`](scripts/cachyos-postinstall-check.sh): read-only health check of the CachyOS side of a dual-boot (chapter 9).
 
 ## The 15-minute checklist
 
